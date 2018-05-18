@@ -1,0 +1,167 @@
+{% extends 'govuk_template.html' %}
+{% load static %}
+{% load noms_ops %}
+
+{% block head %}
+  {{ block.super }}
+  <link href="{% static 'stylesheets/noms_ops.css' %}" media="screen" rel="stylesheet"/>
+{% endblock %}
+
+{% block inner_content %}
+  <div class="breadcrumbs">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a>Credits</a></li>
+    </ol>
+  </div>
+
+  <main role="main" id="content">
+    <header>
+      <h1 class="heading-xlarge" style="margin-bottom:0">Credits</h1>
+    </header>
+
+    {% if form.filtered %}
+      <ul class="list-filters">
+        <li>
+          <span>Filters:</span>
+        </li>
+        {% for label, query in form.filters %}
+          <li>
+            <a href="?{{ query }}" title="Remove filter">{{ label }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <a class="button js-dialogue-open" href="#filter-dialogue">Edit filters</a>
+      <a href="?" style="display:inline-block;margin:8px 0 0 16px">Clear all filters</a>
+    {% else %}
+      <p class="lede">Showing all credits. Add a filter to narrow down your search.</p>
+      <a class="button js-dialogue-open" href="#filter-dialogue">Add a filter</a>
+    {% endif %}
+
+    <form id="filter-dialogue__container" class="mtp-dialogue__container">
+      <div id="filter-dialogue" class="mtp-dialogue " role="dialog" aria-hidden="true" aria-labelledby="filter-dialogue__title" aria-describedby="filter-dialogue__contents">
+        <header id="filter-dialogue__title">
+          <h3 class="heading-large">
+            {% if form.filtered %}
+              Edit filters
+            {% else %}
+              Add a filter
+            {% endif %}
+          </h3>
+          <span>
+            <button type="submit" id="apply-filter-btn" class="button"></button>
+            <a class="button-secondary js-dialogue-close">Cancel</a>
+          </span>
+        </header>
+        <div id="filter-dialogue__contents" class="mtp-dialogue__contents">
+          {% include 'noms_ops/filter-options.html' %}
+        </div>
+      </div>
+    </form>
+
+    {% if form.is_valid %}
+      <div class="results-list-container">
+        <table class="results-list">
+          <thead>
+            <tr>
+              <th>
+                <a class="{{ form|ordering_classes:'received_at' }}" href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
+                  Date received
+                </a>
+              </th>
+              <th>
+                <a class="{{ form|ordering_classes:'prisoner_number' }}" href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+                  Prisoner
+                </a>
+              </th>
+              <th></th>
+              <th>
+                <a class="{{ form|ordering_classes:'source' }}" href="?{{ form|query_string_with_reversed_ordering:'source' }}">
+                  Payment source
+                </a>
+              </th>
+              <th>
+                <a class="{{ form|ordering_classes:'amount' }}" href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+                  Amount
+                </a>
+              </th>
+              <th>
+                <a class="{{ form|ordering_classes:'prison' }}" href="?{{ form|query_string_with_reversed_ordering:'prison' }}">
+                  Prison
+                </a>
+              </th>
+              <th>
+                <a class="{{ form|ordering_classes:'status' }}" href="?{{ form|query_string_with_reversed_ordering:'status' }}">
+                  Status
+                </a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for credit in credits_list %}
+              <tr>
+                <td>
+                  {{ credit.received_at|date:'j N Y' }}
+                </td>
+                <td>
+                  <a href="#">{{ credit.prisoner_number }}</a>
+                  <br/>
+                  {{ credit.prisoner_name }}
+                </td>
+                <td class="credit-arrow"></td>
+                <td>
+                  <a href="#">{{ credit.sender_name }}</a>
+                  <br/>
+                  by {% format_choice sources credit.source %}
+                </td>
+                <td>
+                  {{ credit.amount|currency }}
+                </td>
+                <td>
+                  {% format_choice prisons credit.prison %}
+                </td>
+                <td>
+                  {% format_choice statuses credit.status %}
+                  <br/>
+                  <a href="#">View details</a>
+                </td>
+                <!--
+                {{ credit|dump_credit }}
+                -->
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7">No credits match your filters</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        {% with count=credits_list|length %}
+          {% if count == 1 %}
+            Found {{ count }} credit
+          {% else %}
+            Found {{ count }} credits
+          {% endif %}
+        {% endwith %}
+      </p>
+    {% else %}
+      <br/>
+      <br/>
+      <p class="error-message">There are errors in your form</p>
+    {% endif %}
+  </main>
+{% endblock %}
+
+{% block body_end %}
+  {{ block.super }}
+  <script src="{% static 'javascripts/noms_ops.js' %}"></script>
+  {% if not form.is_valid %}
+    <script>
+      $(function () {
+        $('#filter-dialogue').trigger('dialogue:open');
+      });
+    </script>
+  {% endif %}
+{% endblock %}

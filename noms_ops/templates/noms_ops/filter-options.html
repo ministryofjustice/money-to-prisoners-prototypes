@@ -1,0 +1,100 @@
+{% load noms_ops %}
+
+{{ form.error_summary }}
+
+{% include 'noms_ops/filter-section-start.html' with key='date' label='Date' %}
+  <div class="grid-row">
+    <div class="column-half">
+      {{ form.received_at__gte.label_tag }}<br/>
+      {{ form.received_at__gte }}
+    </div>
+    <div class="column-half">
+      {{ form.received_at__lt.label_tag }}<br/>
+      {{ form.received_at__lt }}
+    </div>
+  </div>
+{% include 'noms_ops/filter-section-end.html' %}
+
+{% include 'noms_ops/filter-section-start.html' with key='amount' label='Amount (£)' %}
+  {% for choice, label in form.amount_pattern.field.choices %}
+    <div class="multiple-choice" data-target="amount_pattern-{{ choice }}-extra">
+      <input id="amount_pattern-{{ choice }}" type="radio" name="amount_pattern" value="{{ choice }}" {% if form.amount_pattern.value == choice %}checked{% endif %}>
+      <label for="amount_pattern-{{ choice }}">{{ label }}</label>
+    </div>
+    {% if choice == 'exact' %}
+      <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+        {{ form.amount_exact }}
+      </div>
+    {% elif choice == 'pence' %}
+      <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+        {{ form.amount_pence }}
+      </div>
+    {% endif %}
+  {% endfor %}
+{% include 'noms_ops/filter-section-end.html' %}
+
+{% include 'noms_ops/filter-section-start.html' with key='source' label='Payment source' %}
+  {{ form.sender_name.label_tag }}<br/>
+  {{ form.sender_name }}
+  <br/>
+  <br/>
+  {% for choice, label in form.source.field.choices %}
+    <div class="multiple-choice" data-target="source-{{ choice }}-extra">
+      <input id="source-{{ choice }}" type="radio" name="source" value="{{ choice }}" {% if form.source.value == choice or forloop.first and not form.source.value %}checked{% endif %}>
+      <label for="source-{{ choice }}">{{ label }}</label>
+    </div>
+    {% if choice == 'bank_transfer' %}
+      <div class="panel panel-border-narrow js-hidden" id="source-{{ choice }}-extra">
+        {{ form.sender_sort_code.label_tag }}<br/>
+        {{ form.sender_sort_code }}
+        <br/>
+        <br/>
+        {{ form.sender_account_number.label_tag }}<br/>
+        {{ form.sender_account_number }}
+        <br/>
+        <br/>
+      </div>
+    {% elif choice == 'online' %}
+      <div class="panel panel-border-narrow js-hidden" id="source-{{ choice }}-extra">
+        {{ form.card_number_last_digits.label_tag }}<br/>
+        {{ form.card_number_last_digits }}
+        <br/>
+        <br/>
+        {{ form.postcode.label_tag }}<br/>
+        {{ form.postcode }}
+        <br/>
+        <br/>
+        {{ form.sender_email.label_tag }}<br/>
+        {{ form.sender_email }}
+        <br/>
+        <br/>
+        {{ form.ip_address.label_tag }}<br/>
+        {{ form.ip_address }}
+        <br/>
+        <br/>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% include 'noms_ops/filter-section-end.html' %}
+
+{% include 'noms_ops/filter-section-start.html' with key='prisoner' label='Prisoner' %}
+  {{ form.prisoner_number.label_tag }}<br/>
+  {{ form.prisoner_number }}
+  <br/>
+  <br/>
+  {{ form.prisoner_name.label_tag }}<br/>
+  {{ form.prisoner_name }}
+{% include 'noms_ops/filter-section-end.html' %}
+
+{% include 'noms_ops/filter-section-start.html' with key='prison' label='Prison' %}
+  {{ form.prison }}
+{% include 'noms_ops/filter-section-end.html' %}
+
+{% include 'noms_ops/filter-section-start.html' with key='status' label='Status' %}
+  {% for choice, label in form.status.field.choices %}
+    <div class="multiple-choice">
+      <input id="status-{{ choice }}" type="radio" name="status" value="{{ choice }}" {% if form.status.value == choice or forloop.first and not form.status.value %}checked{% endif %}>
+      <label for="status-{{ choice }}">{{ label }}</label>
+    </div>
+  {% endfor %}
+{% include 'noms_ops/filter-section-end.html' %}

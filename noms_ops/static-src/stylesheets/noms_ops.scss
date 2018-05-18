@@ -1,0 +1,186 @@
+@import "css3";
+@import "colours/palette";
+@import "conditionals";
+@import "design-patterns/buttons";
+@import "device-pixels";
+@import "url-helpers";
+
+@import 'govuk-forms';
+
+$path: "/static/";
+
+.button-secondary {
+  @include button($grey-3);
+  color: #000 !important;  // IE8 bug, not $text-colour or $black since they're lighter
+}
+
+.mtp-dialogue__container {
+  @include box-sizing(border-box);
+  display: none;
+  position: fixed;
+  z-index: 5000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80%;
+}
+
+.mtp-dialogue {
+  @include box-sizing(border-box);
+  display: none;
+  position: relative;
+  width: 800px;
+  height: 100%;
+  margin: 4em auto;
+  padding: 0 1em 1em;
+  overflow: scroll;
+  background: $page-colour;
+  border: 4px solid $text-colour;
+
+  &:focus {
+    outline: 3px solid $focus-colour;
+  }
+
+  header {
+    position: fixed;
+    z-index: 10;
+    width: 754px;
+    padding: 1.5em 0 0.6em;
+    background: $page-colour;
+    border-bottom: 3px solid $border-colour;
+
+    h3 {
+      margin: 0;
+    }
+    span {
+      position: absolute;
+      top: 24px;
+      right: 0;
+    }
+  }
+}
+
+.mtp-dialogue__contents {
+  padding-top: 4em;
+}
+
+.mtp-dialogue__backdrop {
+  display: block;
+  position: fixed;
+  z-index: 4999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  content: ' ';
+  background: $canvas-colour;
+  @include opacity(0.8);
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+
+  @media print {
+    display: none !important;
+  }
+}
+
+.js-dialogue-open {
+  visibility: hidden;
+
+  .js-enabled & {
+    visibility: visible;
+  }
+}
+
+.list-filters {
+  display: block;
+  overflow: hidden;
+  margin-bottom: 1em;
+
+  li {
+    float: left;
+  }
+
+  span, a {
+    display: inline-block;
+  }
+
+  span {
+    margin-right: 1em;
+    padding: 5px 0;
+    font-weight: bold;
+  }
+
+  a {
+    margin: 3px 1em 0.6em 3px;
+    padding: 2px 28px 2px 10px;
+    background: $grey-3 file-url("images/remove-filter.png") no-repeat 100% 50%;
+    @include device-pixel-ratio {
+      background-image: file-url("images/remove-filter.svg");
+    }
+    border-right: 4px solid $grey-3;
+    color: $text-colour;
+    text-decoration: none;
+  }
+}
+
+.section-choice-container {
+   margin-top: 2em;
+}
+
+.panel {
+  padding-bottom: 0;
+}
+
+.results-list-container {
+  @include media($max-width: 900px, $ignore-for-ie: true) {
+    @media screen {
+      overflow-x: scroll;
+
+      table {
+        min-width: 900px;
+      }
+    }
+  }
+}
+
+.results-list {
+  margin-top: 1em;
+
+  thead {
+    border-top: 1px solid $border-colour;
+  }
+
+  th, td {
+    vertical-align: top;
+  }
+
+  th a {
+    text-decoration: none;
+  }
+}
+
+.results-ordering--asc, .results-ordering--desc {
+  padding-right: 16px;
+  text-decoration: underline !important;
+  background: transparent file-url('images/ordering-asc.png') no-repeat 100% 50%;
+  @include device-pixel-ratio {
+    background-image: file-url('images/ordering-asc.svg');
+  }
+}
+
+.results-ordering--desc {
+  background-image: file-url('images/ordering-desc.png');
+  @include device-pixel-ratio {
+    background-image: file-url('images/ordering-desc.svg');
+  }
+}
+
+.credit-arrow {
+  min-width: 40px;
+  background: file-url("images/credit-arrow.png") no-repeat 50% 20px;
+  @include device-pixel-ratio {
+    background-image: file-url("images/credit-arrow.svg");
+  }
+}

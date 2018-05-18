@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'govuk_template_base',
     'govuk_template',
     'govuk_forms',
+    'noms_ops',
 ]
 
 MIDDLEWARE = [
