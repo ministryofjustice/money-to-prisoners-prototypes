@@ -2,7 +2,11 @@
 
 {% section_selected form key as section_selected %}
 <div class="section-choice-container multiple-choice" data-target="section-{{ key }}">
-  <input id="section-choice-{{ key }}" class="section-checkbox" type="checkbox" name="_section" value="" {% if section_selected %}checked{% endif %}>
+  <input id="section-choice-{{ key }}" class="section-checkbox" type="{% if view.prototype == 1 %}radio{% else %}checkbox{% endif %}" name="_section" value="" {% if view.prototype == 2 and section_selected %}checked{% endif %}>
   <label for="section-choice-{{ key }}">{{ label }}</label>
 </div>
 <div class="panel panel-border-narrow js-hidden" id="section-{{ key }}">
+  {% if view.prototype == 1 %}
+  <form>
+    {% hidden_fields_excluding_section form key %}
+  {% endif %}

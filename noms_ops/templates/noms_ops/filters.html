@@ -31,25 +31,43 @@
           </li>
         {% endfor %}
       </ul>
-      <a class="button js-dialogue-open" href="#filter-dialogue">Edit filters</a>
-      <a href="?" style="display:inline-block;margin:8px 0 0 16px">Clear all filters</a>
     {% else %}
-      <p class="lede">Showing all credits. Add a filter to narrow down your search.</p>
-      <a class="button js-dialogue-open" href="#filter-dialogue">Add a filter</a>
+      <p class="lede">All credits are shown below. Add a filter to narrow down your search.</p>
     {% endif %}
 
-    <form id="filter-dialogue__container" class="mtp-dialogue__container">
-      <div id="filter-dialogue" class="mtp-dialogue " role="dialog" aria-hidden="true" aria-labelledby="filter-dialogue__title" aria-describedby="filter-dialogue__contents">
+    {% if view.prototype == 1 %}
+      <a class="button js-dialogue-open" href="#filter-dialogue">Add a filter</a>
+      {% if form.filtered %}
+        <a href="?" style="display:inline-block;margin:8px 0 0 16px">Clear all filters</a>
+      {% endif %}
+    {% else %}
+      {% if form.filtered %}
+        <a class="button js-dialogue-open" href="#filter-dialogue">Edit filters</a>
+        <a href="?" style="display:inline-block;margin:8px 0 0 16px">Clear all filters</a>
+      {% else %}
+        <a class="button js-dialogue-open" href="#filter-dialogue">Add a filter</a>
+      {% endif %}
+    {% endif %}
+
+    <{% if view.prototype == 1 %}div{% else %}form{% endif %} id="filter-dialogue__container" class="mtp-dialogue__container">
+      <input type="hidden" name="ordering" value="{{ form.ordering.value }}">
+      <div id="filter-dialogue" class="mtp-dialogue" role="dialog" aria-hidden="true" aria-labelledby="filter-dialogue__title" aria-describedby="filter-dialogue__contents">
         <header id="filter-dialogue__title">
           <h3 class="heading-large">
-            {% if form.filtered %}
-              Edit filters
-            {% else %}
+            {% if view.prototype == 1 %}
               Add a filter
+            {% else %}
+              {% if form.filtered %}
+                Edit filters
+              {% else %}
+                Add a filter
+              {% endif %}
             {% endif %}
           </h3>
           <span>
-            <button type="submit" id="apply-filter-btn" class="button"></button>
+            {% if view.prototype == 2 %}
+              <button type="submit" id="apply-filter-btn" class="button"></button>
+            {% endif %}
             <a class="button-secondary js-dialogue-close">Cancel</a>
           </span>
         </header>
@@ -57,7 +75,7 @@
           {% include 'noms_ops/filter-options.html' %}
         </div>
       </div>
-    </form>
+    </{% if view.prototype == 1 %}div{% else %}form{% endif %}>
 
     {% if form.is_valid %}
       <div class="results-list-container">

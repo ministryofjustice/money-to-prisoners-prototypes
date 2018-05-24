@@ -7,6 +7,7 @@ from noms_ops.models import prisons, sources, statuses
 class FilterView(FormView):
     template_name = 'noms_ops/filters.html'
     form_class = FilterForm
+    prototype = None
 
     get = FormView.post
     form_valid = FormView.form_invalid
