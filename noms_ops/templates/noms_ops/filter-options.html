@@ -2,14 +2,14 @@
 
 {{ form.error_summary }}
 
-{% include 'noms_ops/filter-section-start.html' with key='date' label='Date' %}
+{% include 'noms_ops/filter-section-start.html' with key='date' label='Date received' %}
   <div class="grid-row">
     <div class="column-half">
-      {{ form.received_at__gte.label_tag }}<br/>
+      From<br/>
       {{ form.received_at__gte }}
     </div>
     <div class="column-half">
-      {{ form.received_at__lt.label_tag }}<br/>
+      To<br/>
       {{ form.received_at__lt }}
     </div>
   </div>
@@ -33,7 +33,7 @@
   {% endfor %}
 {% include 'noms_ops/filter-section-end.html' %}
 
-{% include 'noms_ops/filter-section-start.html' with key='source' label='Payment source' %}
+{% include 'noms_ops/filter-section-start.html' with key='source' label='Payment source' hint='E.g. sender name or account details' %}
   {{ form.sender_name.label_tag }}<br/>
   {{ form.sender_name }}
   <br/>
@@ -41,7 +41,14 @@
   {% for choice, label in form.source.field.choices %}
     <div class="multiple-choice" data-target="source-{{ choice }}-extra">
       <input id="source-{{ choice }}" type="radio" name="source" value="{{ choice }}" {% if form.source.value == choice or forloop.first and not form.source.value %}checked{% endif %}>
-      <label for="source-{{ choice }}">{{ label }}</label>
+      <label for="source-{{ choice }}">
+        {{ label }}
+        {% if choice == 'bank_transfer' %}
+          <span class="form-hint">E.g. account number or sort code</span>
+        {% elif choice == 'online' %}
+          <span class="form-hint">E.g. card number or email address</span>
+        {% endif %}
+      </label>
     </div>
     {% if choice == 'bank_transfer' %}
       <div class="panel panel-border-narrow js-hidden" id="source-{{ choice }}-extra">
@@ -90,7 +97,7 @@
   {{ form.prison }}
 {% include 'noms_ops/filter-section-end.html' %}
 
-{% include 'noms_ops/filter-section-start.html' with key='status' label='Status' %}
+{% include 'noms_ops/filter-section-start.html' with key='status' label='Credited status' hint='E.g. pending processing by business hub' %}
   {% for choice, label in form.status.field.choices %}
     <div class="multiple-choice">
       <input id="status-{{ choice }}" type="radio" name="status" value="{{ choice }}" {% if form.status.value == choice or forloop.first and not form.status.value %}checked{% endif %}>
