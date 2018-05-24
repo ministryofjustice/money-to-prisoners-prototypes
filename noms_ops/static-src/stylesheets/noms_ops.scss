@@ -14,6 +14,10 @@ $path: "/static/";
   color: #000 !important;  // IE8 bug, not $text-colour or $black since they're lighter
 }
 
+.multiple-choice input {
+  filter: none;
+}
+
 .mtp-dialogue__container {
   @include box-sizing(border-box);
   display: none;
@@ -22,7 +26,7 @@ $path: "/static/";
   top: 0;
   left: 0;
   width: 100%;
-  height: 80%;
+  height: 90%;
 }
 
 .mtp-dialogue {
@@ -31,7 +35,7 @@ $path: "/static/";
   position: relative;
   width: 800px;
   height: 100%;
-  margin: 4em auto;
+  margin: 4em auto 2em;
   padding: 0 1em 1em;
   overflow: scroll;
   background: $page-colour;
@@ -61,7 +65,7 @@ $path: "/static/";
 }
 
 .mtp-dialogue__contents {
-  padding-top: 4em;
+  padding-top: 5em;
 }
 
 .mtp-dialogue__backdrop {
@@ -126,7 +130,10 @@ $path: "/static/";
 }
 
 .section-choice-container {
-   margin-top: 2em;
+   margin-top: 1em;
+}
+.section-choice-panel {
+   margin-bottom: 3em;
 }
 
 .panel {
