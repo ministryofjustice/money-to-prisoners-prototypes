@@ -103,29 +103,35 @@ $path: "/static/";
   margin-bottom: 1em;
 
   li {
-    float: left;
-  }
-
-  span, a {
     display: inline-block;
-  }
+    float: left;
+    margin: 0 1em 0.6em 0;
 
-  span {
-    margin-right: 1em;
-    padding: 5px 0;
-    font-weight: bold;
-  }
-
-  a {
-    margin: 3px 1em 0.6em 3px;
-    padding: 2px 28px 2px 10px;
-    background: $grey-3 file-url("images/remove-filter.png") no-repeat 100% 50%;
-    @include device-pixel-ratio {
-      background-image: file-url("images/remove-filter.svg");
+    &.list-filters__note {
+      padding: 2px 0;
+      font-weight: bold;
     }
-    border-right: 4px solid $grey-3;
-    color: $text-colour;
-    text-decoration: none;
+
+    &.list-filters__filter {
+      padding: 2px 10px;
+      background: $grey-3;
+
+      a {
+        display: inline-block;
+        overflow: hidden;
+        width: 22px;
+        height: 22px;
+        margin-left: 6px;
+        vertical-align: middle;
+        font-size: 1px;
+        text-indent: -100px;
+        text-decoration: none;
+        background: file-url("images/remove-filter.png") no-repeat;
+        @include device-pixel-ratio {
+          background-image: file-url("images/remove-filter.svg");
+        }
+      }
+    }
   }
 }
 

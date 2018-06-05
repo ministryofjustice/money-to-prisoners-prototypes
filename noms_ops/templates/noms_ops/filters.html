@@ -22,12 +22,13 @@
 
     {% if form.filtered %}
       <ul class="list-filters">
-        <li>
-          <span>Filters:</span>
+        <li class="list-filters__note">
+          Filters:
         </li>
         {% for label, query in form.filters %}
-          <li>
-            <a href="?{{ query }}" title="Remove filter">{{ label }}</a>
+          <li class="list-filters__filter">
+            {{ label }}
+            <a href="?{{ query }}">Remove this filter</a>
           </li>
         {% endfor %}
       </ul>
