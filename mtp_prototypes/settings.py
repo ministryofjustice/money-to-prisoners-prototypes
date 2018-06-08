@@ -26,6 +26,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'mtp_prototypes.auth.BasicAuthorisationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -57,6 +58,13 @@ DATABASES = {}
 
 AUTH_PASSWORD_VALIDATORS = []
 
+AUTHENTICATION_BACKENDS = []
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+
+BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
+BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
+
 LANGUAGE_CODE = 'en-gb'
 TIME_ZONE = 'Europe/London'
 USE_I18N = True
@@ -66,7 +74,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 GOVUK_SERVICE_SETTINGS = {
-    'name': 'Money to prisoners',
+    'name': 'Prisoner money',
     'phase': 'beta',
     'header_link_view_name': 'index',
 }
