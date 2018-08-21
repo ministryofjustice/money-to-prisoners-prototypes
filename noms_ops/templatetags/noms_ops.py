@@ -11,7 +11,7 @@ register = template.Library()
 
 
 @register.filter
-def dump_credit(credit):
+def dump_object(credit):
     return mark_safe(json.dumps(credit, cls=DjangoJSONEncoder))
 
 

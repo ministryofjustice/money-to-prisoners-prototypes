@@ -1,0 +1,94 @@
+{% extends 'noms_ops/filters.html' %}
+{% load noms_ops %}
+
+
+{% block filter_options %}
+  {% include 'noms_ops/filter-senders.html' %}
+  {% include 'noms_ops/filter-prison.html' %}
+{% endblock %}
+
+
+{% block object_list %}
+  <div class="results-list-container">
+    <table class="results-list">
+      <thead>
+        <tr>
+          <th>
+            Payment source
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'credit_count' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
+              Sent
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'prisoner_count' }}" href="?{{ form|query_string_with_reversed_ordering:'prisoner_count' }}">
+              Prisoners
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'prison_count' }}" href="?{{ form|query_string_with_reversed_ordering:'prison_count' }}">
+              Prisons
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'credit_total' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
+              Amount
+            </a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sender in object_list %}
+          <tr>
+            <td>
+              <a href="#">{{ sender.sender_name }}</a>
+              <br/>
+              by {% format_choice sources sender.source %}
+            </td>
+            <td>
+              {% if sender.credit_count == 1 %}
+                {{ sender.credit_count }} credit sent
+              {% else %}
+                {{ sender.credit_count }} credits sent
+              {% endif %}
+            </td>
+            <td>
+              {% if sender.prisoner_count == 1 %}
+                {{ sender.prisoner_count }} prisoner
+              {% else %}
+                {{ sender.prisoner_count }} prisoners
+              {% endif %}
+            </td>
+            <td>
+              {% if sender.prison_count == 1 %}
+                {{ sender.prison_count }} prison
+              {% else %}
+                {{ sender.prison_count }} prisons
+              {% endif %}
+            </td>
+            <td>
+              {{ sender.credit_total|currency }}
+            </td>
+            <!--
+            {{ sender|dump_object }}
+            -->
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No payment sources match your filters</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    {% with count=object_list|length %}
+      {% if count == 1 %}
+        Found {{ count }} payment source
+      {% else %}
+        Found {{ count }} payment sources
+      {% endif %}
+    {% endwith %}
+  </p>
+{% endblock %}

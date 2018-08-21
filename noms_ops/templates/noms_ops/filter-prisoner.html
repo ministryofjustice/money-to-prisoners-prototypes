@@ -1,0 +1,8 @@
+{% include 'noms_ops/filter-section-start.html' with key='prisoner' label='Prisoner' %}
+  {{ form.prisoner_number.label_tag }}<br/>
+  {{ form.prisoner_number }}
+  <br/>
+  <br/>
+  {{ form.prisoner_name.label_tag }}<br/>
+  {{ form.prisoner_name }}
+{% include 'noms_ops/filter-section-end.html' %}

@@ -1,0 +1,142 @@
+{% extends 'noms_ops/filters.html' %}
+{% load noms_ops %}
+
+
+{% block filter_options %}
+  {% include 'noms_ops/filter-section-start.html' with key='date' label='Date received' %}
+    <div class="grid-row">
+      <div class="column-half">
+        From<br/>
+        {{ form.received_at__gte }}
+      </div>
+      <div class="column-half">
+        To<br/>
+        {{ form.received_at__lt }}
+      </div>
+    </div>
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='amount' label='Amount (£)' %}
+    {% for choice, label in form.amount_pattern.field.choices %}
+      <div class="multiple-choice" data-target="amount_pattern-{{ choice }}-extra">
+        <input id="amount_pattern-{{ choice }}" type="radio" name="amount_pattern" value="{{ choice }}" {% if form.amount_pattern.value == choice %}checked{% endif %}>
+        <label for="amount_pattern-{{ choice }}">{{ label }}</label>
+      </div>
+      {% if choice == 'exact' %}
+        <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+          {{ form.amount_exact }}
+        </div>
+      {% elif choice == 'pence' %}
+        <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+          {{ form.amount_pence }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-senders.html' %}
+  {% include 'noms_ops/filter-prisoner.html' %}
+  {% include 'noms_ops/filter-prison.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='status' label='Credited status' hint='E.g. pending processing by business hub' %}
+    {% for choice, label in form.status.field.choices %}
+      <div class="multiple-choice">
+        <input id="status-{{ choice }}" type="radio" name="status" value="{{ choice }}" {% if form.status.value == choice or forloop.first and not form.status.value %}checked{% endif %}>
+        <label for="status-{{ choice }}">{{ label }}</label>
+      </div>
+    {% endfor %}
+  {% include 'noms_ops/filter-section-end.html' %}
+{% endblock %}
+
+
+{% block object_list %}
+  <div class="results-list-container">
+    <table class="results-list">
+      <thead>
+        <tr>
+          <th>
+            <a class="{{ form|ordering_classes:'received_at' }}" href="?{{ form|query_string_with_reversed_ordering:'received_at' }}">
+              Date received
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'prisoner_number' }}" href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+              Prisoner
+            </a>
+          </th>
+          <th></th>
+          <th>
+            <a class="{{ form|ordering_classes:'source' }}" href="?{{ form|query_string_with_reversed_ordering:'source' }}">
+              Payment source
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'amount' }}" href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+              Amount
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'prison' }}" href="?{{ form|query_string_with_reversed_ordering:'prison' }}">
+              Prison
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'status' }}" href="?{{ form|query_string_with_reversed_ordering:'status' }}">
+              Status
+            </a>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for credit in object_list %}
+          <tr>
+            <td>
+              {{ credit.received_at|date:'j N Y' }}
+            </td>
+            <td>
+              <a href="#">{{ credit.prisoner_number }}</a>
+              <br/>
+              {{ credit.prisoner_name }}
+            </td>
+            <td class="credit-arrow"></td>
+            <td>
+              <a href="#">{{ credit.sender_name }}</a>
+              <br/>
+              by {% format_choice sources credit.source %}
+            </td>
+            <td>
+              {{ credit.amount|currency }}
+            </td>
+            <td>
+              {% format_choice prisons credit.prison %}
+            </td>
+            <td>
+              {% format_choice statuses credit.status %}
+              <br/>
+              <a href="#">View details</a>
+            </td>
+            <!--
+            {{ credit|dump_object }}
+            -->
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No credits match your filters</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    {% with count=object_list|length %}
+      {% if count == 1 %}
+        Found {{ count }} credit
+      {% else %}
+        Found {{ count }} credits
+      {% endif %}
+    {% endwith %}
+  </p>
+{% endblock %}

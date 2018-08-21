@@ -1,0 +1,50 @@
+{% include 'noms_ops/filter-section-start.html' with key='source' label='Payment source' hint='E.g. sender name or account details' %}
+  {{ form.sender_name.label_tag }}<br/>
+  {{ form.sender_name }}
+  <br/>
+  <br/>
+  {% for choice, label in form.source.field.choices %}
+    <div class="multiple-choice" data-target="source-{{ choice }}-extra">
+      <input id="source-{{ choice }}" type="radio" name="source" value="{{ choice }}" {% if form.source.value == choice or forloop.first and not form.source.value %}checked{% endif %}>
+      <label for="source-{{ choice }}">
+        {{ label }}
+        {% if choice == 'bank_transfer' %}
+          <span class="form-hint">E.g. account number or sort code</span>
+        {% elif choice == 'online' %}
+          <span class="form-hint">E.g. card number or email address</span>
+        {% endif %}
+      </label>
+    </div>
+    {% if choice == 'bank_transfer' %}
+      <div class="panel panel-border-narrow js-hidden" id="source-{{ choice }}-extra">
+        {{ form.sender_sort_code.label_tag }}<br/>
+        {{ form.sender_sort_code }}
+        <br/>
+        <br/>
+        {{ form.sender_account_number.label_tag }}<br/>
+        {{ form.sender_account_number }}
+        <br/>
+        <br/>
+      </div>
+    {% elif choice == 'online' %}
+      <div class="panel panel-border-narrow js-hidden" id="source-{{ choice }}-extra">
+        {{ form.card_number_last_digits.label_tag }}<br/>
+        {{ form.card_number_last_digits }}
+        <br/>
+        <br/>
+        {{ form.postcode.label_tag }}<br/>
+        {{ form.postcode }}
+        <br/>
+        <br/>
+        {{ form.sender_email.label_tag }}<br/>
+        {{ form.sender_email }}
+        <br/>
+        <br/>
+        {{ form.ip_address.label_tag }}<br/>
+        {{ form.ip_address }}
+        <br/>
+        <br/>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% include 'noms_ops/filter-section-end.html' %}
