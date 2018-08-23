@@ -8,11 +8,11 @@ import faker
 
 fake = faker.Faker(locale='en_GB')
 
-PRISONER_COUNT = 40
-SENDER_COUNT = 45
-RECIPIENT_COUNT = 20
-CREDIT_COUNT = 50
-DISBURSEMENT_COUNT = 30
+PRISONER_COUNT = 80
+SENDER_COUNT = 90
+RECIPIENT_COUNT = 40
+CREDIT_COUNT = 100
+DISBURSEMENT_COUNT = 60
 
 yesterday = datetime.date.today() - datetime.timedelta(days=1)
 
