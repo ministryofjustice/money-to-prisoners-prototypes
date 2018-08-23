@@ -8,8 +8,10 @@ from django.utils.dateformat import format as format_date
 from govuk_forms.fields import SplitDateField
 from govuk_forms.forms import GOVUKForm
 
-from noms_ops.models import AmountPattern, prisons, sources, statuses, \
-    credits_list, sender_list, prisoner_list
+from noms_ops.models import AmountPattern, prisons, sources, methods, \
+    credit_statuses, disbursement_statuses, \
+    sender_list, prisoner_list, \
+    credits_list, disbursement_list
 from noms_ops.templatetags.noms_ops import currency
 
 
@@ -59,7 +61,7 @@ class FilterForm(GOVUKForm):
             }
             data.update(self.initial)
             data.update(self.data)
-            for key in ('received_at__gte', 'received_at__lt'):
+            for key in ('received_at__gte', 'received_at__lt', 'created__gte', 'created__lt'):
                 values = data.get(key, '').split('-')
                 if len(values) != 3:
                     continue
@@ -155,6 +157,67 @@ class FilterForm(GOVUKForm):
         return sorted(filter(compare, self.object_source), key=lambda obj: obj[ordering], reverse=reverse)
 
 
+class AmountMixin(FilterForm):
+    amount_pattern = forms.ChoiceField(label='Amount (£)', required=False, choices=AmountPattern.get_choices())
+    amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
+    amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
+
+    def clean_amount_exact(self):
+        if self.cleaned_data.get('amount_pattern') != 'exact':
+            return ''
+        amount = self.cleaned_data.get('amount_exact')
+        if not amount:
+            raise ValidationError('This field is required for the selected amount pattern', code='required')
+        return amount
+
+    def clean_amount_pence(self):
+        if self.cleaned_data.get('amount_pattern') != 'pence':
+            return None
+        amount = self.cleaned_data.get('amount_pence')
+        if amount is None:
+            raise ValidationError('This field is required for the selected amount pattern', code='required')
+        return amount
+
+    def describe_filter__amount(self, query_data, get_query, descriptions):
+        amount_pattern = query_data.get('amount_pattern')
+        amount_exact = query_data.get('amount_exact', '0')
+        amount_pence = query_data.get('amount_pence', '0')
+        if amount_pattern:
+            if amount_pattern == 'exact':
+                label = 'exactly %s' % currency(parse_amount(amount_exact))
+            elif amount_pattern == 'pence':
+                label = 'exactly %s pence' % amount_pence
+            else:
+                label = AmountPattern[amount_pattern].value.lower()
+            descriptions.append((
+                'Amount: %s' % label,
+                get_query('amount_pattern', 'amount_exact', 'amount_pence')
+            ))
+        return {'amount_pattern', 'amount_exact', 'amount_pence'}
+
+    def perform_filter__amount(self, query_data, obj):
+        amount_pattern = query_data.get('amount_pattern')
+        if amount_pattern == 'not_integral':
+            if not bool(obj['amount'] % 100):
+                raise StopFiltering
+        elif amount_pattern == 'not_multiple_5':
+            if str(obj['amount'])[-3:] in ('000', '500'):
+                raise StopFiltering
+        elif amount_pattern == 'not_multiple_10':
+            if str(obj['amount'])[-3:] == '000':
+                raise StopFiltering
+        elif amount_pattern == 'gte_100':
+            if obj['amount'] < 10000:
+                raise StopFiltering
+        elif amount_pattern == 'exact':
+            if obj['amount'] != parse_amount(query_data['amount_exact']):
+                raise StopFiltering
+        elif amount_pattern == 'pence':
+            if obj['amount'] % 100 != int(query_data['amount_pence']):
+                raise StopFiltering
+        return {'amount_pattern', 'amount_exact', 'amount_pence'}
+
+
 class PrisonerMixin(FilterForm):
     prisoner_number = forms.CharField(label='Prisoner number', validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label='Prisoner name', required=False)
@@ -165,7 +228,7 @@ class PrisonerMixin(FilterForm):
             return prisoner_number.upper()
         return prisoner_number
 
-    def perform_filter__amount(self, query_data, obj):
+    def perform_filter__prisoner_name(self, query_data, obj):
         prisoner_name = query_data.get('prisoner_name')
         if prisoner_name and (prisoner_name.upper() not in obj['prisoner_name'].upper()):
             raise StopFiltering
@@ -253,7 +316,7 @@ class SenderMixin(FilterForm):
         return {'postcode'}
 
 
-class CreditForm(PrisonerMixin, PrisonMixin, SenderMixin, FilterForm):
+class CreditForm(AmountMixin, PrisonerMixin, PrisonMixin, SenderMixin, FilterForm):
     ordering = forms.ChoiceField(label='Order by', required=False,
                                  initial='-received_at',
                                  choices=[
@@ -276,11 +339,7 @@ class CreditForm(PrisonerMixin, PrisonMixin, SenderMixin, FilterForm):
     received_at__gte = SplitDateField(label='Received since', help_text='for example 13/02/2018', required=False)
     received_at__lt = SplitDateField(label='Received before', help_text='for example 13/02/2018', required=False)
 
-    status = forms.ChoiceField(label='Credited status', required=False, choices=list(statuses.items()))
-
-    amount_pattern = forms.ChoiceField(label='Amount (£)', required=False, choices=AmountPattern.get_choices())
-    amount_exact = forms.CharField(label=AmountPattern.exact.value, validators=[validate_amount], required=False)
-    amount_pence = forms.IntegerField(label=AmountPattern.pence.value, min_value=0, max_value=99, required=False)
+    status = forms.ChoiceField(label='Credited status', required=False, choices=list(credit_statuses.items()))
 
     sections = {
         'date': ('received_at__gte', 'received_at__lt'),
@@ -296,22 +355,6 @@ class CreditForm(PrisonerMixin, PrisonMixin, SenderMixin, FilterForm):
     }
 
     object_source = credits_list
-
-    def clean_amount_exact(self):
-        if self.cleaned_data.get('amount_pattern') != 'exact':
-            return ''
-        amount = self.cleaned_data.get('amount_exact')
-        if not amount:
-            raise ValidationError('This field is required for the selected amount pattern', code='required')
-        return amount
-
-    def clean_amount_pence(self):
-        if self.cleaned_data.get('amount_pattern') != 'pence':
-            return None
-        amount = self.cleaned_data.get('amount_pence')
-        if amount is None:
-            raise ValidationError('This field is required for the selected amount pattern', code='required')
-        return amount
 
     def describe_filter__received_at(self, query_data, get_query, descriptions):
         received_at__gte = query_data.get('received_at__gte')
@@ -345,49 +388,10 @@ class CreditForm(PrisonerMixin, PrisonMixin, SenderMixin, FilterForm):
         status = query_data.get('status')
         if status:
             descriptions.append((
-                'Status: %s' % statuses[status].lower(),
+                'Status: %s' % credit_statuses[status].lower(),
                 get_query('status')
             ))
         return {'status'}
-
-    def describe_filter__amount(self, query_data, get_query, descriptions):
-        amount_pattern = query_data.get('amount_pattern')
-        amount_exact = query_data.get('amount_exact', '0')
-        amount_pence = query_data.get('amount_pence', '0')
-        if amount_pattern:
-            if amount_pattern == 'exact':
-                label = 'exactly %s' % currency(parse_amount(amount_exact))
-            elif amount_pattern == 'pence':
-                label = 'exactly %s pence' % amount_pence
-            else:
-                label = AmountPattern[amount_pattern].value.lower()
-            descriptions.append((
-                'Amount: %s' % label,
-                get_query('amount_pattern', 'amount_exact', 'amount_pence')
-            ))
-        return {'amount_pattern', 'amount_exact', 'amount_pence'}
-
-    def perform_filter__amount(self, query_data, obj):
-        amount_pattern = query_data.get('amount_pattern')
-        if amount_pattern == 'not_integral':
-            if not bool(obj['amount'] % 100):
-                raise StopFiltering
-        elif amount_pattern == 'not_multiple_5':
-            if str(obj['amount'])[-3:] not in ('000', '500'):
-                raise StopFiltering
-        elif amount_pattern == 'not_multiple_10':
-            if str(obj['amount'])[-3:] != '000':
-                raise StopFiltering
-        elif amount_pattern == 'gte_100':
-            if obj['amount'] >= 10000:
-                raise StopFiltering
-        elif amount_pattern == 'exact':
-            if obj['amount'] != parse_amount(query_data['amount_exact']):
-                raise StopFiltering
-        elif amount_pattern == 'pence':
-            if obj['amount'] % 100 != int(query_data['amount_pence']):
-                raise StopFiltering
-        return {'amount_pattern', 'amount_exact', 'amount_pence'}
 
 
 class SenderForm(PrisonMixin, SenderMixin, FilterForm):
@@ -433,6 +437,10 @@ class PrisonerForm(PrisonerMixin, PrisonMixin, FilterForm):
                                      ('-credit_count', 'Number of credits (high to low)'),
                                      ('credit_total', 'Total received (low to high)'),
                                      ('-credit_total', 'Total received (high to low)'),
+                                     ('disbursement_count', 'Number of disbursements (low to high)'),
+                                     ('-disbursement_count', 'Number of disbursements (high to low)'),
+                                     ('disbursement_total', 'Total sent (low to high)'),
+                                     ('-disbursement_total', 'Total sent (high to low)'),
                                      ('prisoner_name', 'Prisoner name (A to Z)'),
                                      ('-prisoner_name', 'Prisoner name (Z to A)'),
                                      ('prisoner_number', 'Prisoner number (A to Z)'),
@@ -445,3 +453,134 @@ class PrisonerForm(PrisonerMixin, PrisonMixin, FilterForm):
     }
 
     object_source = prisoner_list
+
+
+class DisbursementForm(AmountMixin, PrisonerMixin, PrisonMixin, FilterForm):
+    ordering = forms.ChoiceField(label='Order by', required=False,
+                                 initial='-created',
+                                 choices=[
+                                     ('created', 'Date entered (oldest to newest)'),
+                                     ('-created', 'Date entered (newest to oldest)'),
+                                     ('amount', 'Amount sent (low to high)'),
+                                     ('-amount', 'Amount sent (high to low)'),
+                                     ('prisoner_name', 'Prisoner name (A to Z)'),
+                                     ('-prisoner_name', 'Prisoner name (Z to A)'),
+                                     ('prisoner_number', 'Prisoner number (A to Z)'),
+                                     ('-prisoner_number', 'Prisoner number (Z to A)'),
+                                 ])
+
+    created__gte = SplitDateField(label='Entered since', help_text='for example 13/02/2018', required=False)
+    created__lt = SplitDateField(label='Entered before', help_text='for example 13/02/2018', required=False)
+
+    resolution = forms.ChoiceField(label='Status', required=False, choices=list(disbursement_statuses.items()))
+    invoice_number = forms.CharField(label='Invoice number', required=False)
+
+    method = forms.ChoiceField(label='Payment method', required=False, choices=insert_blank_option(
+        list(methods.items()),
+        title='Any method',
+    ))
+    recipient_name = forms.CharField(label='Recipient name', required=False)
+    recipient_email = forms.CharField(label='Recipient email', required=False)
+    city = forms.CharField(label='City', required=False)
+    postcode = forms.CharField(label='Post code', required=False)
+    sort_code = forms.CharField(label='Sort code', help_text='for example 01-23-45', required=False)
+    account_number = forms.CharField(label='Account number', required=False)
+    roll_number = forms.CharField(label='Roll number', required=False)
+
+    sections = {
+        'date': ('created__gte', 'created__lt'),
+        'amount': ('amount_pattern', 'amount_exact', 'amount_pence'),
+        'recipient': (
+            'method', 'method',
+        ),
+        'prisoner': ('prisoner_number', 'prisoner_name'),
+        'prison': ('prison', 'prison_region', 'prison_population', 'prison_category'),
+        'resolution': ('resolution',),
+        'invoice': ('invoice_number',),
+    }
+
+    object_source = disbursement_list
+
+    def clean_sort_code(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        sort_code = self.cleaned_data.get('sort_code')
+        if sort_code:
+            sort_code = sort_code.replace('-', '')
+        return sort_code
+
+    def clean_sender_account_number(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('account_number')
+
+    def clean_sender_roll_number(self):
+        if self.cleaned_data.get('method') != 'bank_transfer':
+            return ''
+        return self.cleaned_data.get('roll_number')
+
+    def describe_filter__created(self, query_data, get_query, descriptions):
+        created__gte = query_data.get('created__gte')
+        created__lt = query_data.get('created__lt')
+        if created__gte or created__lt:
+            if created__gte and created__lt:
+                label = 'Entered between %s and %s' % (format_date(created__gte, 'j N Y'),
+                                                       format_date(created__lt, 'j N Y'))
+            elif created__gte:
+                label = 'Entered since %s' % format_date(created__gte, 'j N Y')
+            else:
+                label = 'Entered before %s' % format_date(created__lt, 'j N Y')
+            descriptions.append((
+                label,
+                get_query('created__gte', 'created__lt')
+            ))
+        return {'created__gte', 'created__lt'}
+
+    def perform_filter__created(self, query_data, obj):
+        created__gte = query_data.get('created__gte')
+        created__lt = query_data.get('created__lt')
+        if created__gte:
+            if obj['created'].date() < created__gte:
+                raise StopFiltering
+        if created__lt:
+            if obj['created'].date() > created__lt:
+                raise StopFiltering
+        return {'created__gte', 'created__lt'}
+
+    def describe_filter__status(self, query_data, get_query, descriptions):
+        status = query_data.get('status')
+        if status:
+            descriptions.append((
+                'Status: %s' % credit_statuses[status].lower(),
+                get_query('status')
+            ))
+        return {'status'}
+
+    def describe_filter__method(self, query_data, get_query, descriptions):
+        method = query_data.get('method')
+        if method:
+            descriptions.append((
+                'Payment method: %s' % methods[method].lower(),
+                get_query('method')
+            ))
+        return {'method'}
+
+    def perform_filter__sender_name(self, query_data, obj):
+        recipient_name = query_data.get('recipient_name')
+        if recipient_name and (recipient_name.upper() not in (
+            obj['recipient_first_name'] + obj['recipient_last_name']
+        ).upper()):
+            raise StopFiltering
+        return {'recipient_name'}
+
+    def perform_filter__recipient_email(self, query_data, obj):
+        recipient_email = query_data.get('recipient_email')
+        if recipient_email and (recipient_email.upper() not in obj['recipient_email'].upper()):
+            raise StopFiltering
+        return {'recipient_email'}
+
+    def perform_filter__postcode(self, query_data, obj):
+        postcode = query_data.get('postcode')
+        if postcode and (postcode.upper() not in obj['postcode'].upper()):
+            raise StopFiltering
+        return {'postcode'}

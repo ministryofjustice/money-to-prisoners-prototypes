@@ -21,21 +21,34 @@
           <th>
             Prison
           </th>
-          <th>
-            <a class="{{ form|ordering_classes:'credit_count' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
-              Received
-            </a>
-          </th>
-          <th>
-            <a class="{{ form|ordering_classes:'sender_count' }}" href="?{{ form|query_string_with_reversed_ordering:'sender_count' }}">
-              Payment sources
-            </a>
-          </th>
-          <th>
-            <a class="{{ form|ordering_classes:'credit_total' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
-              Amount
-            </a>
-          </th>
+          {% if view.axis == 'disbursements' %}
+            <th>
+              <a class="{{ form|ordering_classes:'disbursement_count' }}" href="?{{ form|query_string_with_reversed_ordering:'disbursement_count' }}">
+                Sent
+              </a>
+            </th>
+            <th>
+              <a class="{{ form|ordering_classes:'disbursement_total' }}" href="?{{ form|query_string_with_reversed_ordering:'disbursement_total' }}">
+                Amount
+              </a>
+            </th>
+          {% else %}
+            <th>
+              <a class="{{ form|ordering_classes:'credit_count' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_count' }}">
+                Received
+              </a>
+            </th>
+            <th>
+              <a class="{{ form|ordering_classes:'sender_count' }}" href="?{{ form|query_string_with_reversed_ordering:'sender_count' }}">
+                Payment sources
+              </a>
+            </th>
+            <th>
+              <a class="{{ form|ordering_classes:'credit_total' }}" href="?{{ form|query_string_with_reversed_ordering:'credit_total' }}">
+                Amount
+              </a>
+            </th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -49,23 +62,36 @@
             <td>
               {% format_choice prisons prisoner.prison %}
             </td>
-            <td>
-              {% if prisoner.credit_count == 1 %}
-                {{ prisoner.credit_count }} credit received
-              {% else %}
-                {{ prisoner.credit_count }} credits received
-              {% endif %}
-            </td>
-            <td>
-              {% if prisoner.sender_count == 1 %}
-                {{ prisoner.sender_count }} payment source
-              {% else %}
-                {{ prisoner.sender_count }} payment sources
-              {% endif %}
-            </td>
-            <td>
-              {{ prisoner.credit_total|currency }}
-            </td>
+            {% if view.axis == 'disbursements' %}
+              <td>
+                {% if prisoner.disbursement_count == 1 %}
+                  {{ prisoner.disbursement_count }} disbursement sent
+                {% else %}
+                  {{ prisoner.disbursement_count }} disbursements sent
+                {% endif %}
+              </td>
+              <td>
+                {{ prisoner.disbursement_total|currency }}
+              </td>
+            {% else %}
+              <td>
+                {% if prisoner.credit_count == 1 %}
+                  {{ prisoner.credit_count }} credit received
+                {% else %}
+                  {{ prisoner.credit_count }} credits received
+                {% endif %}
+              </td>
+              <td>
+                {% if prisoner.sender_count == 1 %}
+                  {{ prisoner.sender_count }} payment source
+                {% else %}
+                  {{ prisoner.sender_count }} payment sources
+                {% endif %}
+              </td>
+              <td>
+                {{ prisoner.credit_total|currency }}
+              </td>
+            {% endif %}
             <!--
             {{ prisoner|dump_object }}
             -->

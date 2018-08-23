@@ -2,7 +2,21 @@
 
 {% block inner_content %}
   <h1 class="heading-large">Prisoner money intelligence</h1>
-  <a class="button" href="{% url 'noms_ops:credits' %}">Credits</a>
-  <a class="button" href="{% url 'noms_ops:senders' %}">Payment sources</a>
-  <a class="button" href="{% url 'noms_ops:prisoners' %}">Prisoners</a>
+  <ul class="list">
+    <li>
+      <a class="button" href="{% url 'noms_ops:credits' %}">Credits</a>
+    </li>
+    <li>
+      <a class="button" href="{% url 'noms_ops:senders' %}">Payment sources</a>
+    </li>
+    <li>
+      <a class="button" href="{% url 'noms_ops:prisoners' %}">Prisoners</a>
+    </li>
+    <li>
+      <a class="button" href="{% url 'noms_ops:disbursements' %}">Disbursements</a>
+    </li>
+    <li>
+      <a class="button" href="{% url 'noms_ops:prisoners-disbursements' %}">Prisoners by disbursement [<em>new page</em>]</a>
+    </li>
+  </ul>
 {% endblock %}

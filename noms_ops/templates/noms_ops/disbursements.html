@@ -1,0 +1,180 @@
+{% extends 'noms_ops/filters.html' %}
+{% load noms_ops %}
+
+
+{% block filter_options %}
+  {% include 'noms_ops/filter-section-start.html' with key='date' label='Date entered' %}
+    <div class="grid-row">
+      <div class="column-half">
+        From<br/>
+        {{ form.created__gte }}
+      </div>
+      <div class="column-half">
+        To<br/>
+        {{ form.created__lt }}
+      </div>
+    </div>
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='amount' label='Amount (£)' %}
+    {% for choice, label in form.amount_pattern.field.choices %}
+      <div class="multiple-choice" data-target="amount_pattern-{{ choice }}-extra">
+        <input id="amount_pattern-{{ choice }}" type="radio" name="amount_pattern" value="{{ choice }}" {% if form.amount_pattern.value == choice %}checked{% endif %}>
+        <label for="amount_pattern-{{ choice }}">{{ label }}</label>
+      </div>
+      {% if choice == 'exact' %}
+        <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+          {{ form.amount_exact }}
+        </div>
+      {% elif choice == 'pence' %}
+        <div class="panel panel-border-narrow js-hidden" id="amount_pattern-{{ choice }}-extra">
+          {{ form.amount_pence }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='recipient' label='Recipient' hint='E.g. their name, email or account details' %}
+    {{ form.recipient_name.label_tag }}<br/>
+    {{ form.recipient_name }}
+    <br/>
+    <br/>
+    {{ form.recipient_email.label_tag }}<br/>
+    {{ form.recipient_email }}
+    <br/>
+    <br/>
+    {{ form.postcode.label_tag }}<br/>
+    {{ form.postcode }}
+    <br/>
+    <br/>
+    {% for choice, label in form.method.field.choices %}
+      <div class="multiple-choice" data-target="method-{{ choice }}-extra">
+        <input id="method-{{ choice }}" type="radio" name="method" value="{{ choice }}" {% if form.method.value == choice or forloop.first and not form.method.value %}checked{% endif %}>
+        <label for="method-{{ choice }}">
+          {{ label }}
+          {% if choice == 'bank_transfer' %}
+            <span class="form-hint">E.g. account number or sort code</span>
+          {% endif %}
+        </label>
+      </div>
+      {% if choice == 'bank_transfer' %}
+        <div class="panel panel-border-narrow js-hidden" id="method-{{ choice }}-extra">
+          {{ form.sort_code.label_tag }}<br/>
+          {{ form.sort_code }}
+          <br/>
+          <br/>
+          {{ form.account_number.label_tag }}<br/>
+          {{ form.account_number }}
+          <br/>
+          <br/>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-prisoner.html' %}
+  {% include 'noms_ops/filter-prison.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='invoice' label='Invoice number' %}
+    {{ form.invoice_number.label_tag }}<br/>
+    {{ form.invoice_number }}
+  {% include 'noms_ops/filter-section-end.html' %}
+
+
+  {% include 'noms_ops/filter-section-start.html' with key='resolution' label='Status' hint='E.g. entered or sent to SSCL' %}
+    {% for choice, label in form.resolution.field.choices %}
+      <div class="multiple-choice">
+        <input id="resolution-{{ choice }}" type="radio" name="resolution" value="{{ choice }}" {% if form.resolution.value == choice or forloop.first and not form.resolution.value %}checked{% endif %}>
+        <label for="resolution-{{ choice }}">{{ label }}</label>
+      </div>
+    {% endfor %}
+  {% include 'noms_ops/filter-section-end.html' %}
+{% endblock %}
+
+
+{% block object_list %}
+  <div class="results-list-container">
+    <table class="results-list">
+      <thead>
+        <tr>
+          <th>
+            <a class="{{ form|ordering_classes:'created' }}" href="?{{ form|query_string_with_reversed_ordering:'created' }}">
+              Date entered
+            </a>
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'prisoner_number' }}" href="?{{ form|query_string_with_reversed_ordering:'prisoner_number' }}">
+              Prisoner
+            </a>
+          </th>
+          <th></th>
+          <th>
+            Recipient
+          </th>
+          <th>
+            <a class="{{ form|ordering_classes:'amount' }}" href="?{{ form|query_string_with_reversed_ordering:'amount' }}">
+              Amount
+            </a>
+          </th>
+          <th>
+            Prison
+          </th>
+          <th>
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for disbursement in object_list %}
+          <tr>
+            <td>
+              {{ disbursement.created|date:'j N Y' }}
+            </td>
+            <td>
+              <a href="#">{{ disbursement.prisoner_number }}</a>
+              <br/>
+              {{ disbursement.prisoner_name }}
+            </td>
+            <td class="disbursement-arrow"></td>
+            <td>
+              {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
+              <br/>
+              by {% format_choice methods disbursement.method %}
+            </td>
+            <td>
+              {{ disbursement.amount|currency }}
+            </td>
+            <td>
+              {% format_choice prisons disbursement.prison %}
+            </td>
+            <td>
+              {% format_choice disbursement_statuses disbursement.resolution %}
+              <br/>
+              <a href="#">View details</a>
+            </td>
+            <!--
+            {{ disbursement|dump_object }}
+            -->
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No disbursements match your filters</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    {% with count=object_list|length %}
+      {% if count == 1 %}
+        Found {{ count }} disbursement
+      {% else %}
+        Found {{ count }} disbursements
+      {% endif %}
+    {% endwith %}
+  </p>
+{% endblock %}

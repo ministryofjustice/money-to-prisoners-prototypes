@@ -1,7 +1,7 @@
 from django.views.generic import FormView
 
-from noms_ops.forms import CreditForm, SenderForm, PrisonerForm
-from noms_ops.models import prisons, sources, statuses
+from noms_ops.forms import CreditForm, SenderForm, PrisonerForm, DisbursementForm
+from noms_ops.models import prisons, sources, methods, credit_statuses, disbursement_statuses
 
 
 class FilterView(FormView):
@@ -19,7 +19,9 @@ class FilterView(FormView):
             object_list=context_data['form'].object_list,
             prisons=prisons,
             sources=sources,
-            statuses=statuses,
+            methods=methods,
+            credit_statuses=credit_statuses,
+            disbursement_statuses=disbursement_statuses,
         )
         return context_data
 
@@ -40,3 +42,10 @@ class PrisonerView(FilterView):
     title = 'Prisoners'
     template_name = 'noms_ops/prisoners.html'
     form_class = PrisonerForm
+    axis = None
+
+
+class DisbursementView(FilterView):
+    title = 'Disbursements'
+    template_name = 'noms_ops/disbursements.html'
+    form_class = DisbursementForm

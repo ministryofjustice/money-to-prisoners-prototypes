@@ -1,10 +1,13 @@
 from django.urls import path
 
-from noms_ops.views import CreditView, SenderView, PrisonerView
+from noms_ops.views import CreditView, SenderView, PrisonerView, DisbursementView
 
 app_name = 'noms_ops'
 urlpatterns = [
-    path('filters/credits/', CreditView.as_view(), name='credits'),
-    path('filters/senders/', SenderView.as_view(), name='senders'),
-    path('filters/prisoners/', PrisonerView.as_view(), name='prisoners'),
+    path('credits/', CreditView.as_view(), name='credits'),
+    path('credits/senders/', SenderView.as_view(), name='senders'),
+    path('credits/prisoners/', PrisonerView.as_view(axis='credits'), name='prisoners'),
+
+    path('disbursements/', DisbursementView.as_view(), name='disbursements'),
+    path('disbursements/prisoners/', PrisonerView.as_view(axis='disbursements'), name='prisoners-disbursements'),
 ]

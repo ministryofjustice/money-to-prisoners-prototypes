@@ -197,3 +197,11 @@ $path: "/static/";
     background-image: file-url("images/credit-arrow.svg");
   }
 }
+
+.disbursement-arrow {
+  min-width: 40px;
+  background: file-url("images/disbursement-arrow.png") no-repeat 50% 20px;
+  @include device-pixel-ratio {
+    background-image: file-url("images/disbursement-arrow.svg");
+  }
+}
