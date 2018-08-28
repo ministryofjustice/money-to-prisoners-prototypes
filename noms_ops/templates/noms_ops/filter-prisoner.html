@@ -5,4 +5,13 @@
   <br/>
   {{ form.prisoner_name.label_tag }}<br/>
   {{ form.prisoner_name }}
+  <br/>
+  <br/>
+  <div class="multiple-choice">
+    <input id="current_serving-{{ choice }}" type="checkbox" name="current_serving" {% if form.current_serving.value %}checked{% endif %}>
+    <label for="current_serving-{{ choice }}">
+      {{ form.current_serving.label }}
+      <span class="form-hint">{{ form.current_serving.help_text }}</span>
+    </label>
+  </div>
 {% include 'noms_ops/filter-section-end.html' %}

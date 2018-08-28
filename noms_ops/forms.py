@@ -10,7 +10,7 @@ from govuk_forms.forms import GOVUKForm
 
 from noms_ops.models import AmountPattern, prisons, sources, methods, \
     credit_statuses, disbursement_statuses, \
-    sender_list, prisoner_list, \
+    sender_list, prisoner_list, current_prisoner_list, \
     credits_list, disbursement_list
 from noms_ops.templatetags.noms_ops import currency
 
@@ -221,6 +221,10 @@ class AmountMixin(FilterForm):
 class PrisonerMixin(FilterForm):
     prisoner_number = forms.CharField(label='Prisoner number', validators=[validate_prisoner_number], required=False)
     prisoner_name = forms.CharField(label='Prisoner name', required=False)
+    current_serving = forms.BooleanField(
+        label='Only serving prisoners', required=False,
+        help_text='Excludes people not currently in a public prison in England or Wales',
+    )
 
     def clean_prisoner_number(self):
         prisoner_number = self.cleaned_data.get('prisoner_number')
@@ -233,6 +237,21 @@ class PrisonerMixin(FilterForm):
         if prisoner_name and (prisoner_name.upper() not in obj['prisoner_name'].upper()):
             raise StopFiltering
         return {'prisoner_name'}
+
+    def describe_filter__current_serving(self, query_data, get_query, descriptions):
+        current_serving = query_data.get('current_serving')
+        if current_serving:
+            descriptions.append((
+                'Only serving prisoners',
+                get_query('current_serving')
+            ))
+        return {'current_serving'}
+
+    def perform_filter__current_serving(self, query_data, obj):
+        current_serving = query_data.get('current_serving')
+        if current_serving and obj['prisoner_number'] not in current_prisoner_list:
+            raise StopFiltering
+        return {'current_serving'}
 
 
 class PrisonMixin(FilterForm):
@@ -349,7 +368,7 @@ class CreditForm(AmountMixin, PrisonerMixin, PrisonMixin, SenderMixin, FilterFor
             'sender_sort_code', 'sender_account_number', 'sender_roll_number',
             'card_number_last_digits', 'sender_email', 'postcode', 'ip_address',
         ),
-        'prisoner': ('prisoner_number', 'prisoner_name'),
+        'prisoner': ('prisoner_number', 'prisoner_name', 'current_serving'),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category'),
         'status': ('status',),
     }
@@ -448,7 +467,7 @@ class PrisonerForm(PrisonerMixin, PrisonMixin, FilterForm):
                                  ])
 
     sections = {
-        'prisoner': ('prisoner_number', 'prisoner_name'),
+        'prisoner': ('prisoner_number', 'prisoner_name', 'current_serving'),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category'),
     }
 
@@ -493,7 +512,7 @@ class DisbursementForm(AmountMixin, PrisonerMixin, PrisonMixin, FilterForm):
         'recipient': (
             'method', 'method',
         ),
-        'prisoner': ('prisoner_number', 'prisoner_name'),
+        'prisoner': ('prisoner_number', 'prisoner_name', 'current_serving'),
         'prison': ('prison', 'prison_region', 'prison_population', 'prison_category'),
         'resolution': ('resolution',),
         'invoice': ('invoice_number',),

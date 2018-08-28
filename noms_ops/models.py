@@ -72,6 +72,7 @@ def generate_prisoner_list():
 
 
 prisoner_list = sorted(generate_prisoner_list(), key=lambda prisoner: prisoner['prisoner_number'])
+current_prisoner_list = set(prisoner['prisoner_number'] for prisoner in prisoner_list if prisoner['prison'])
 skipped_prisoner_keys = {
     'sender_count', 'recipient_count',
     'credit_count', 'credit_total', 'disbursement_count', 'disbursement_total',
