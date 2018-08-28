@@ -60,7 +60,11 @@
               {{ prisoner.prisoner_name }}
             </td>
             <td>
-              {% format_choice prisons prisoner.prison %}
+              {% if prisoner.prison %}
+                {% format_choice prisons prisoner.prison %}
+              {% else %}
+                <span title="Not currently in a public prison in England or Wales" class="help-tooltip">None</span>
+              {% endif %}
             </td>
             {% if view.axis == 'disbursements' %}
               <td>

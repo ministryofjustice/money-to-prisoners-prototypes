@@ -57,7 +57,7 @@ def generate_prisoner_list():
     for i in range(PRISONER_COUNT):
         yield {
             'id': i,
-            'prison': next(prison_choices),
+            'prison': next(prison_choices) if random.random() < 0.95 else None,
             'prisoner_name': ('%s %s' % (fake.first_name_male(), fake.last_name())).upper(),
             'prisoner_number': 'X%s%s' % (
                 get_random_string(4, '0123456789'),
@@ -148,7 +148,11 @@ def generate_credits_list():
 
         prisoner['_senders'].add(sender['id'])
         sender['_prisoners'].add(prisoner['id'])
-        sender['_prisons'].add(prisoner['prison'])
+
+        if prisoner['prison']:
+            sender['_prisons'].add(prisoner['prison'])
+        else:
+            credit['prison'] = random.choice(list(prisons.keys()))
 
         yield credit
 
@@ -234,7 +238,11 @@ def generate_disbursements_list():
 
         prisoner['_recipients'].add(recipient['id'])
         recipient['_prisoners'].add(prisoner['id'])
-        recipient['_prisons'].add(prisoner['prison'])
+
+        if prisoner['prison']:
+            recipient['_prisons'].add(prisoner['prison'])
+        else:
+            disbursement['prison'] = random.choice(list(prisons.keys()))
 
         yield disbursement
 
