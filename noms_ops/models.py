@@ -34,7 +34,7 @@ sources = {
     'online': 'Card',
 }
 methods = {
-    'bank_transfer': 'Bank transfer',
+    'bank_transfer': 'Bank account',
     'cheque': 'Cheque',
 }
 

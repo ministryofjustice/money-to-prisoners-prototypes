@@ -103,7 +103,7 @@
         <tr>
           <th>
             <a class="{{ form|ordering_classes:'created' }}" href="?{{ form|query_string_with_reversed_ordering:'created' }}">
-              Date entered
+              Date
             </a>
           </th>
           <th>
@@ -111,7 +111,6 @@
               Prisoner
             </a>
           </th>
-          <th></th>
           <th>
             Recipient
           </th>
@@ -124,26 +123,30 @@
             Prison
           </th>
           <th>
-            Status
+            Notification
           </th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for disbursement in object_list %}
           <tr>
             <td>
-              {{ disbursement.created|date:'j N Y' }}
+              {{ disbursement.created|date:'d/m/Y' }}
             </td>
             <td>
-              <a href="#">{{ disbursement.prisoner_number }}</a>
-              <br/>
-              {{ disbursement.prisoner_name }}
+              {{ disbursement.prisoner_name }}<br/>
+              <a href="#">{{ disbursement.prisoner_number }}</a>  
             </td>
-            <td class="disbursement-arrow"></td>
             <td>
               {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
               <br/>
-              by {% format_choice methods disbursement.method %}
+              <p>
+                {% format_choice methods disbursement.method %}<br/>
+                {% if disbursement.method == 'bank_transfer' %}
+                  {{ disbursement.account_number }}/{{ disbursement.sort_code|format_sort_code }}
+                {% endif %}
+              </p>
             </td>
             <td>
               {{ disbursement.amount|currency }}
@@ -151,10 +154,9 @@
             <td>
               {% format_choice prisons disbursement.prison %}
             </td>
+            <td></td>
             <td>
-              {% format_choice disbursement_statuses disbursement.resolution %}
-              <br/>
-              <a href="#">View details</a>
+              <a href="#">View</a>
             </td>
             <!--
             {{ disbursement|dump_object }}
