@@ -30,8 +30,8 @@ disbursement_statuses = {
     'sent': 'Sent',
 }
 sources = {
-    'bank_transfer': 'Bank transfer',
-    'online': 'Debit card',
+    'bank_transfer': 'Bank account',
+    'online': 'Card',
 }
 methods = {
     'bank_transfer': 'Bank transfer',

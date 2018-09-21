@@ -63,3 +63,16 @@ def query_string_with_reversed_ordering(form, ordering):
         ordering = '-%s' % ordering
     data['ordering'] = ordering
     return urlencode(data, doseq=True)
+
+
+@register.filter
+def format_sort_code(sort_code):
+    new_sort_code = []
+    start = 0
+    end = 2
+    while end <= len(sort_code):
+        new_sort_code.append(sort_code[start:end])
+        start = end
+        end = start + 2
+
+    return '-'.join(new_sort_code)
