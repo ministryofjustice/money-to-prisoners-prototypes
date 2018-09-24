@@ -154,7 +154,13 @@
             <td>
               {% format_choice prisons disbursement.prison %}
             </td>
-            <td></td>
+            <td class="flag">
+              {% if disbursement.amount > 6000 %}
+                <p> {{ disbursement.flag }}</p>
+              {% else %}
+                {{ ' ' }}
+              {% endif %}
+            </td>
             <td>
               <a href="#">View</a>
             </td>

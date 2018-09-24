@@ -68,6 +68,9 @@ def generate_prisoner_list():
             'sender_count': 0, 'recipient_count': 0,
             'credit_count': 0, 'credit_total': 0,
             'disbursement_count': 0, 'disbursement_total': 0,
+            'flag': '#%s' % (
+                get_random_string(3, '0123456789'),
+            ),
         }
 
 
@@ -272,3 +275,14 @@ def post_process():
 
 post_process()
 del fake
+
+
+# def generate_notification_flag(amount):
+#     if amount > 50:
+#         return get_random_string(3, '0123456789')
+#     else:
+#         return ''
+
+
+# print(generate_notification_flag(55))
+# print(generate_notification_flag(40))

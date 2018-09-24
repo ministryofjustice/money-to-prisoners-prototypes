@@ -67,7 +67,6 @@
               Prisoner
             </a>
           </th>
-          <th></th>
           <th>
             <a class="{{ form|ordering_classes:'source' }}" href="?{{ form|query_string_with_reversed_ordering:'source' }}">
               Payment source
@@ -101,7 +100,6 @@
               {{ credit.prisoner_name }}<br/>
               <a href="#">{{ credit.prisoner_number }}</a> 
             </td>
-            <td></td>
             <td>
               {{ credit.sender_name }}
               <br/>
@@ -120,7 +118,13 @@
             <td>
               {% format_choice prisons credit.prison %}
             </td>
-            <td></td>
+            <td class="flag">
+              {% if credit.amount > 5000 %}
+                <p> {{ credit.flag }}</p>
+              {% else %}
+                {{ ' ' }}
+              {% endif %}
+            </td>
             <td>
               <a href="#">View</a>
             </td>
