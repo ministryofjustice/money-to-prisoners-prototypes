@@ -98,7 +98,10 @@
             </td>
             <td>
               {{ credit.prisoner_name }}<br/>
-              <a href="#">{{ credit.prisoner_number }}</a> 
+              <a href="#">{{ credit.prisoner_number }}</a>
+              {% if credit.monitored_prisoner %}
+                <p class="monitored monitor-prisoner-icon">monitored</p> 
+              {% endif %}
             </td>
             <td>
               {{ credit.sender_name }}
@@ -111,6 +114,9 @@
                   {{ credit.sender_account_number }}/{{ credit.sender_sort_code|format_sort_code }}
                 {% endif %}
               </p>
+              {% if credit.monitored_sender %}
+                <p class="monitored monitor-prisoner-icon">monitored</p>  
+              {% endif %}
             </td>
             <td>
               {{ credit.amount|currency }}
@@ -121,8 +127,6 @@
             <td class="flag">
               {% if credit.amount > 5000 %}
                 <p> {{ credit.flag }}</p>
-              {% else %}
-                {{ ' ' }}
               {% endif %}
             </td>
             <td>

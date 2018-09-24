@@ -188,9 +188,18 @@ $path: "/static/";
     height: 25px;
   }
 
+  .monitored {
+    color: #808080;
+    padding-left: 25px;
+  }
+
   td p {
     font-size: 15px;
   }
+}
+
+.monitor-prisoner-icon {
+  background: file-url('images/exclamation_mark_icon.png') no-repeat;
 }
 
 .results-ordering--asc, .results-ordering--desc {

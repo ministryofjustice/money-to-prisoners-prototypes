@@ -52,6 +52,13 @@ class AmountPattern(enum.Enum):
         return [(choice.name, choice.value) for choice in cls]
 
 
+monitor_list = [False, False, False, False, True]
+def monitored_prisoner(monitored_prisoner):       
+    return random.choice(monitored_prisoner)
+
+def monitored_sender(monitored_sender):
+    return random.choice(monitored_sender)
+
 def generate_prisoner_list():
     prison_choices = itertools.cycle(prisons.keys())
     for i in range(PRISONER_COUNT):
@@ -71,6 +78,7 @@ def generate_prisoner_list():
             'flag': '#%s' % (
                 get_random_string(3, '0123456789'),
             ),
+            'monitored_prisoner':monitored_prisoner(monitor_list),
         }
 
 
@@ -99,6 +107,7 @@ def generate_sender_list():
             '_prisoners': set(), '_prisons': set(),
             'prisoner_count': 0, 'prison_count': 0,
             'credit_count': 0, 'credit_total': 0,
+            'monitored_sender':monitored_sender(monitor_list),
         }
 
 
@@ -275,14 +284,3 @@ def post_process():
 
 post_process()
 del fake
-
-
-# def generate_notification_flag(amount):
-#     if amount > 50:
-#         return get_random_string(3, '0123456789')
-#     else:
-#         return ''
-
-
-# print(generate_notification_flag(55))
-# print(generate_notification_flag(40))

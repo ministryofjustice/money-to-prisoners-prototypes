@@ -136,7 +136,10 @@
             </td>
             <td>
               {{ disbursement.prisoner_name }}<br/>
-              <a href="#">{{ disbursement.prisoner_number }}</a>  
+              <a href="#">{{ disbursement.prisoner_number }}</a>
+              {% if disbursement.monitored_prisoner %}
+                <p class="monitored monitor-prisoner-icon">monitored</p> 
+              {% endif %}
             </td>
             <td>
               {{ disbursement.recipient_first_name }} {{ disbursement.recipient_last_name }}
@@ -157,8 +160,6 @@
             <td class="flag">
               {% if disbursement.amount > 6000 %}
                 <p> {{ disbursement.flag }}</p>
-              {% else %}
-                {{ ' ' }}
               {% endif %}
             </td>
             <td>
