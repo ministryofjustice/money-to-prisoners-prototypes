@@ -27,28 +27,6 @@
 
 {% block header_class %}with-proposition{% endblock %}
 {% block proposition_header %}
-  {% get_service_settings as service_settings %}
-  <div class="header-proposition">
-    <div class="content">
-      {% if service_settings.has_header_links %}
-        <a href="#proposition-links" class="js-header-toggle menu">{% trans 'Menu' %}</a>
-      {% endif %}
-      <nav id="proposition-menu">
-        <a href="{{ service_settings.header_link_url|default:'/' }}" id="proposition-name">
-          {% block proposition %}{{ service_settings.localised_name }}{% endblock %}
-        </a>
-        {% block proposition_menu %}
-          {% if service_settings.has_header_links %}
-            <ul id="proposition-links">
-              {% for link in service_settings.get_header_links %}
-                <li><a href="{{ link.url }}" class="{% if link.link_is_view_name and link.link == request.resolver_match.view_name %}active{% endif %}">{{ link.localised_name }}</a></li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        {% endblock %}
-      </nav>
-    </div>
-  </div>
 {% endblock %}
 
 {% block content %}

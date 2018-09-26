@@ -152,6 +152,7 @@ $path: "/static/";
 }
 
 .results-list-container {
+  padding-top: 100px;
   @include media($max-width: 900px, $ignore-for-ie: true) {
     @media screen {
       overflow-x: scroll;
@@ -233,3 +234,42 @@ $path: "/static/";
     background-image: file-url("images/disbursement-arrow.svg");
   }
 }
+
+.selected {
+  background: white;
+  position: relative;
+  bottom: -15px;
+  padding-top: 20px;
+}
+
+.tabs nav li.selected a {
+  color: black;
+  position: relative;
+  bottom: 15px;
+}
+
+.tabs nav ul{
+  list-style: none;
+  padding: 0;
+  padding-top: 30px;
+  margin: 0;
+  height: 20px;
+}
+
+.tabs nav li {
+  display: inline;
+  border-width: 1px 1px 0 1px;
+  margin: 0 0 0 0;
+}
+
+.tabs nav li a {
+  padding: 0 10px;
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+.tabs nav li a:active {
+   color: black;
+}
+
